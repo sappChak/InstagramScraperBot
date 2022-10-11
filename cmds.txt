@@ -1,0 +1,4 @@
+1. source venv/bin/activate
+2. flask --app  flask_app run
+3. rq worker
+4. python3 Execution.py

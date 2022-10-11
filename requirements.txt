@@ -1,0 +1,7 @@
+config==0.5.1
+Flask==2.2.2
+instaloader==4.9.5
+python_telegram_bot==13.14
+redis==4.3.4
+rq==1.11.1
+telegram==0.0.1
