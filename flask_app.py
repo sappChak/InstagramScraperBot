@@ -6,7 +6,6 @@ from flask import Flask, request
 from rq import Queue
 from telegram import Bot
 import instaloader
-
 import config
 
 bot = Bot(config.API_TOKEN)
@@ -45,8 +44,7 @@ def get_users_followers(chat_id):
         try:
             print('Entered')
             profile_loader = instaloader.Instaloader()
-            profile_loader.load_session_from_file('activity_checker', filename='/mnt/c/Users/konot/Desktop/mytutorial/RedisTest/session-activity_checker')
-            profile_loader.login(config.USERNAME, config.PASSWORD)
+            profile_loader.load_session_from_file('activity_checker')
             user_profile = instaloader.Profile.from_username(profile_loader.context, "scaryfabioamigo")
             print('Entered')
             time.sleep(2)
