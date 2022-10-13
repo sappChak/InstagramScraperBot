@@ -5,4 +5,5 @@
 5.instaloader --login=activity_checker profile profilenamehereobviously --sessionfile=/Desktop/RedisTest/RedisTest/.instaloder-session
 6.git rm --cached FILENAME
 7.git add FILENAME
-8.git push
+8.git commit -m 'Message' 
+9.git push
