@@ -6,9 +6,9 @@ from flask import Flask, request
 from rq import Queue
 from telegram import Bot
 import instaloader
-import config
+import os
 
-bot = Bot(config.API_TOKEN)
+bot = Bot(os.getenv('API_TOKEN'))
 app = Flask(__name__)
 redis = redis.Redis()
 queue = Queue(connection=redis, default_timeout=99999999)
@@ -35,19 +35,20 @@ def add_task():
         bot.send_message(chat_id,
                          f'Все добре, написав(ла) нік правильно(слава Аллаху). РОЗПОЧАТО слідкування за {text}')
 
-        queue.enqueue('flask_app.get_users_followers', chat_id)
+        queue.enqueue('flask_app.get_users_followers', args=(chat_id, text))
 
     return {'ok': True}
 
-def get_users_followers(chat_id):
+
+def get_users_followers(chat_id, requested_username):
     while True:
         try:
             print('Entered')
             profile_loader = instaloader.Instaloader()
             profile_loader.load_session_from_file('activity_checker')
-            user_profile = instaloader.Profile.from_username(profile_loader.context, "scaryfabioamigo")
+            user_profile = instaloader.Profile.from_username(profile_loader.context, requested_username)
             print('Entered')
-            time.sleep(2)
+            time.sleep(5)
 
             current_followers = []
             for follower in user_profile.get_followers():

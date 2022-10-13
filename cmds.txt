@@ -7,3 +7,8 @@
 7.git add FILENAME
 8.git commit -m 'Message' 
 9.git push
+
+1. virtualvenv venv
+2. source venv/bin/activate
+3. pip install -r requirements.txt
+4. os.getenv('YOUR TELEGRAM BOT TOKEN')
