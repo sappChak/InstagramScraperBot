@@ -8,10 +8,11 @@ from telegram import Bot
 import instaloader
 import os
 
+
 bot = Bot(os.getenv('API_TOKEN'))
 app = Flask(__name__)
 redis = redis.Redis()
-queue = Queue(connection=redis, default_timeout=99999999)
+queue = Queue(connection=redis, default_timeout=999999)
 
 
 def welcome(chat_id):
@@ -21,9 +22,13 @@ def welcome(chat_id):
 @app.route('/', methods=["POST"])
 def add_task():
     chat_id = request.json["message"]["chat"]["id"]
+    username = request.json["message"]["from"]["username"]
+    if username != 'scaryfabioamigo':
+        return {'ok': True}
     print(request.json)
     text = request.json["message"]["text"]
     print(text)
+
     if text == '/start':
         welcome(chat_id)
     else:
@@ -54,18 +59,18 @@ def get_users_followers(chat_id, requested_username):
             for follower in user_profile.get_followers():
                 current_followers.append(follower.username)
 
-            if not path.exists("follower_list.txt"):
-                with open(file='follower_list.txt', mode='w') as file:
+            if not path.exists(f"follower_list-{requested_username}.txt"):
+                with open(file=f'follower_list-{requested_username}.txt', mode='w') as file:
                     file.write(str(current_followers))
             else:
-                with open(file='follower_list.txt', mode='r+') as file:
+                with open(file=f'follower_list-{requested_username}.txt', mode='r+') as file:
                     old_followers = ast.literal_eval(file.read())
 
                 unfollowers = check_unfollowers(old_followers=old_followers, current_followers=current_followers)
                 followers = check_followers(old_followers=old_followers, current_followers=current_followers)
 
                 send_report(chat_id=chat_id, followers=followers, unfollowers=unfollowers)
-                with open(file='follower_list.txt', mode='w') as file:
+                with open(file=f'follower_list-{requested_username}.txt', mode='w') as file:
                     file.write(str(current_followers))
 
         except Exception as e:
