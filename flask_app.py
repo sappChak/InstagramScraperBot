@@ -10,9 +10,9 @@ import os
 
 
 bot = Bot(os.getenv('API_TOKEN'))
-app = Flask(__name__)
 redis = redis.Redis()
 queue = Queue(connection=redis, default_timeout=999999)
+app = Flask(__name__)
 
 
 def welcome(chat_id):
@@ -22,9 +22,9 @@ def welcome(chat_id):
 @app.route('/', methods=["POST"])
 def add_task():
     chat_id = request.json["message"]["chat"]["id"]
-    username = request.json["message"]["from"]["username"]
-    if username != 'scaryfabioamigo':
-        return {'ok': True}
+#    username = request.json["message"]["from"]["username"]
+#    if username != 'scaryfabioamigo':
+#        return {'ok': True}
     print(request.json)
     text = request.json["message"]["text"]
     print(text)
@@ -32,13 +32,18 @@ def add_task():
     if text == '/start':
         welcome(chat_id)
     else:
-
+        return {'ok': True}
         bot.send_message(chat_id, f'Чекайно, зараз подивлюсь чи не наїбав(ла) ти мене...')
         # if wrong_username():
         #     bot.send_message(chat_id, 'Давай по новой, всё хуйня')
         #     return {'ok': True}
         bot.send_message(chat_id,
                          f'Все добре, написав(ла) нік правильно(слава Аллаху). РОЗПОЧАТО слідкування за {text}')
+        from rq import Connection, Worker
+
+        with Connection():
+            worker = Worker(queue)
+            worker.work()
 
         queue.enqueue('flask_app.get_users_followers', args=(chat_id, text))
 
@@ -48,6 +53,7 @@ def add_task():
 def get_users_followers(chat_id, requested_username):
     while True:
         try:
+
             print('Entered')
             profile_loader = instaloader.Instaloader()
             profile_loader.load_session_from_file('activity_checker')
