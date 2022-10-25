@@ -11,7 +11,7 @@ import os
 bot = Bot(os.getenv('API_TOKEN'))
 app = Flask(__name__)
 redis = redis.Redis()
-queue = Queue(connection=redis, default_timeout=999999)
+queue = Queue(connection=redis, default_timeout=-1)
 
 
 def welcome(chat_id):
@@ -23,22 +23,17 @@ def welcome(chat_id):
 
 
 def start_checking_username(chat_id, text):
-    bot.send_message(chat_id, f'Wait, I will check correctness')
-    # if wrong_username():
-    #     bot.send_message(chat_id, 'You have typed wrong username, one attempt lasts')
-    #     return {'ok': True}
-    bot.send_message(chat_id,
-                     f'Everything is ok, I have started checking out for {text}')
-
+    bot.send_message(chat_id, f'Wait, I will check correctness. If no message has came - the nickname was correct ;)')
     queue.enqueue('flask_app.get_users_followers', args=(chat_id, text))
 
 
 @app.route('/', methods=["POST"])
 def add_task():
     chat_id = request.json["message"]["chat"]["id"]
-    username = request.json["message"]["from"]["username"]
-    # if username != 'scaryfabioamigo':
-    #     return {'ok': True}
+    username = request.json["message"]["from"]["first_name"]
+    print(username)
+    if username != 'Andrey':
+        return {'ok': True}
     print(request.json)
     text = request.json["message"]["text"]
     print(text)
@@ -79,7 +74,7 @@ def get_users_followers(chat_id, requested_username):
                     file.write(str(current_followers))
 
         except Exception as e:
-            print(e)
+            bot.send_message(chat_id, f'Profile {requested_username} does not exist')
         time.sleep(900)
 
 
