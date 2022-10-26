@@ -29,7 +29,7 @@ def add_task():
     chat_id = request.json["message"]["chat"]["id"]
     username = request.json["message"]["from"]["first_name"]
     print(username)
-    if username != 'Andrey':
+    if username != 'Andrey' or 'катяша':
         return {'ok': True}
     print(request.json)
     text = request.json["message"]["text"]
@@ -71,7 +71,7 @@ def get_users_followers(chat_id, requested_username):
                 with open(file=f'followers/follower_list-{requested_username}.txt', mode='w') as file:
                     file.write(str(current_followers))
 
-        except Exception as e:
+        except:
             bot.send_message(chat_id, f'Profile {requested_username} does not exist')
             break
         time.sleep(900)
