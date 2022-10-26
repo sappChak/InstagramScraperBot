@@ -15,15 +15,12 @@ queue = Queue(connection=redis, default_timeout=-1)
 
 
 def welcome(chat_id):
-    bot.send_message(chat_id, 'Hi! '
-                              'You have only two attempts to write the username correctly, otherwise you will be'
-                              'banned '
-                              ';). Please, type the username carefully. '
-                              'Enter username to start checking out:')
+    bot.send_message(chat_id, 'Hi! You have only two attempts to write the username correctly, otherwise you will be '
+                              'banned;). Please, type the username carefully. Enter username to start checking out:')
 
 
 def start_checking_username(chat_id, text):
-    bot.send_message(chat_id, f'Wait, I will check correctness. If no message has came - the nickname was correct ;)')
+    bot.send_message(chat_id, f'Wait, I will check correctness.')
     queue.enqueue('flask_app.get_users_followers', args=(chat_id, text))
 
 
@@ -53,6 +50,7 @@ def get_users_followers(chat_id, requested_username):
             profile_loader = instaloader.Instaloader()
             profile_loader.load_session_from_file('check_unfollowers_andrew')
             user_profile = instaloader.Profile.from_username(profile_loader.context, requested_username)
+            bot.send_message(chat_id, 'Everything is ok, nickname was correct.')
             time.sleep(5)
 
             current_followers = []
@@ -75,6 +73,7 @@ def get_users_followers(chat_id, requested_username):
 
         except Exception as e:
             bot.send_message(chat_id, f'Profile {requested_username} does not exist')
+            break
         time.sleep(900)
 
 
