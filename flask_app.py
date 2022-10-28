@@ -23,9 +23,11 @@ def add_task():
     print(request.json)
     try:
         chat_id = request.json['message']['chat']['id']
-        username = request.json['message']['from']['first_name']
+        username = request.json['message']['from']['username']
     except Exception as e:
         bot.ban_chat_sender_chat(chat_id)
+        return {'ok': True}
+    if username != 'scaryfabioamigo' or 's_kaate':  # Currently, bot works privately with 2 particular persons
         return {'ok': True}
     print(username)
     print(chat_id)
