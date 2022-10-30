@@ -1,6 +1,7 @@
 version: "3"
 services:
   flask:
+    image: 104466/app-image
     build: .
     container_name: flask
     restart: always
@@ -17,3 +18,12 @@ services:
     restart: always
     ports:
       - "6379:6379"
+  worker:
+      image: 104466/app-image
+      depends_on:
+          - redis
+      command: rq worker --url redis://redis:6379 &
+      deploy:
+        replicas: 10
+      links:
+          - redis
