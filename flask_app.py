@@ -12,6 +12,8 @@ bot = Bot(os.getenv('API_TOKEN'))
 app = Flask(__name__)
 redis = redis.Redis()
 queue = Queue(connection=redis, default_timeout=-1)
+profile_loader = instaloader.Instaloader()
+profile_loader.load_session_from_file('check_unfollowers_andrew')
 
 
 def welcome(chat_id):
@@ -20,19 +22,15 @@ def welcome(chat_id):
 
 @app.route('/', methods=["POST"])
 def add_task():
-    print(request.json)
     try:
         chat_id = request.json['message']['chat']['id']
         username = request.json['message']['from']['username']
     except Exception as e:
         bot.ban_chat_sender_chat(chat_id)
         return {'ok': True}
-    if username != 'scaryfabioamigo' or 's_kaate':  # Currently, bot works privately with 2 particular persons
-        return {'ok': True}
-    print(username)
-    print(chat_id)
+    #    if username != 'scaryfabioamigo' or 's_kaate':  # Currently, bot works privately with 2 particular persons
+    #        return {'ok': True}
     text = request.json['message']['text']
-    print(text)
 
     if text == '/start':
         welcome(chat_id)
@@ -46,8 +44,6 @@ def get_users_followers(chat_id, requested_username):
     while True:
         try:
             print('Entered')
-            profile_loader = instaloader.Instaloader()
-            profile_loader.load_session_from_file('tmorkva')
             user_profile = instaloader.Profile.from_username(profile_loader.context, requested_username)
             time.sleep(5)
 
@@ -91,7 +87,7 @@ def send_report(chat_id, followers, unfollowers):
         bot.send_message(chat_id, f"I've caught unfollower's username:{str(unfollowers)[1:-1]}")
 
     if followers != 'None':
-        bot.send_message(chat_id, f':{str(followers)[1:-1]} has started subbing you')
+        bot.send_message(chat_id, f':{str(followers)[1:-1]} has/have started subbing you')
 
 
 def check_unfollowers(old_followers, current_followers):
@@ -100,3 +96,7 @@ def check_unfollowers(old_followers, current_followers):
 
 def check_followers(old_followers, current_followers):
     return list(set(current_followers) - set(old_followers))
+
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
