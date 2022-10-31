@@ -24,6 +24,6 @@ services:
           - redis
       command: rq worker --url redis://redis:6379 &
       deploy:
-        replicas: 10
+        replicas: 15
       links:
           - redis

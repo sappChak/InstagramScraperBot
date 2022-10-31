@@ -28,8 +28,8 @@ def add_task():
     except Exception as e:
         bot.ban_chat_sender_chat(chat_id)
         return {'ok': True}
-    #    if username != 'scaryfabioamigo' or 's_kaate':  # Currently, bot works privately with 2 particular persons
-    #        return {'ok': True}
+    if username != 'scaryfabioamigo' and username != 's_kaate':  # Currently, bot works privately with 2 particular persons
+        return {'ok': True}
     text = request.json['message']['text']
 
     if text == '/start':
