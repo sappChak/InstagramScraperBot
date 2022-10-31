@@ -28,7 +28,8 @@ def add_task():
     except Exception as e:
         bot.ban_chat_sender_chat(chat_id)
         return {'ok': True}
-    if username != 'scaryfabioamigo' and username != 's_kaate':  # Currently, bot works privately with 2 particular persons
+    if username != 'scaryfabioamigo' and username != 's_kaate':  # Currently, bot works privately with 2 particular
+        # persons
         return {'ok': True}
     text = request.json['message']['text']
 
@@ -36,6 +37,7 @@ def add_task():
         welcome(chat_id)
     else:
         queue.enqueue('app.get_users_followers', args=(chat_id, text))
+        bot.send_message(chat_id, 'You will be notified when someone will (un)subscribe')
 
     return {'ok': True}
 
@@ -67,7 +69,7 @@ def get_users_followers(chat_id, requested_username):
 
         except Exception as e:
             print(e)
-            bot.send_message(chat_id, f'Profile {requested_username} does not exist')
+            bot.send_message(chat_id, f'Profile {requested_username} does not exist, do not be like eblan')
             break
         time.sleep(900)
 
