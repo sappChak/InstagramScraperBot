@@ -1,9 +1,8 @@
-source venv/bin/activate
-gunicorn -w 2 flask_app:app &
+
 # shellcheck disable=SC2034
-for i in {1..5}
+for i in {1..10}
 do
-  rq worker &
+  rq worker --url redis://redis:6379 &
 done
 
 
