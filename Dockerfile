@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED True
 # Install production dependencies.
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENV API_TOKEN=5667868424:AAEQFu6U077_lfR3oBVmX6zzvaZkkzLPGds
+ENV API_TOKEN=<YOUR TELEGRAM BOT TOKEN HERE>
 
 
 # Run the web service on container startup. Here we use the gunicorn
