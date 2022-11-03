@@ -1,8 +1,8 @@
 
 # shellcheck disable=SC2034
-for i in {1..10}
+for i in {1..15}
 do
-  rq worker --url redis://redis:6379 &
+  rq worker &
 done
 
 

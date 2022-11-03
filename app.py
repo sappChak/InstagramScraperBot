@@ -9,9 +9,13 @@ import instaloader
 import os
 
 bot = Bot(os.getenv('API_TOKEN'))
+
 application = Flask(__name__)
-redis = redis.Redis(host='redis', port=6379)
-queue = Queue(connection=redis, default_timeout=-1)
+
+redis_client = redis.Redis(host='localhost', port=6379)
+
+queue = Queue(connection=redis_client, default_timeout=-1)
+
 profile_loader = instaloader.Instaloader()
 profile_loader.load_session_from_file(username='activity-checker', filename='session-activity_checker')
 
@@ -26,7 +30,6 @@ def add_task():
         chat_id = request.json['message']['chat']['id']
         username = request.json['message']['from']['username']
     except Exception as e:
-        bot.ban_chat_sender_chat(chat_id)
         return {'ok': True}
     if username != 'scaryfabioamigo' and username != 's_kaate':  # Currently, bot works privately with 2 particular
         # persons
@@ -36,6 +39,7 @@ def add_task():
     if text == '/start':
         welcome(chat_id)
     else:
+
         queue.enqueue('app.get_users_followers', args=(chat_id, text))
         bot.send_message(chat_id, 'You will be notified when someone will (un)subscribe')
 
@@ -101,4 +105,4 @@ def check_followers(old_followers, current_followers):
 
 
 if __name__ == "__main__":
-    application.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    application.run(debug=True, host="0.0.0.0", port=os.environ.get("PORT", 8080))
