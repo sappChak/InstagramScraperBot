@@ -10,8 +10,10 @@ import os
 
 bot = Bot(os.getenv('API_TOKEN'))
 application = Flask(__name__)
+
 redis = redis.Redis(host='redis', port=6379)
 queue = Queue(connection=redis, default_timeout=-1)
+
 profile_loader = instaloader.Instaloader()
 profile_loader.load_session_from_file(username='activity-checker', filename='session-activity_checker')
 
@@ -37,7 +39,7 @@ def add_task():
         welcome(chat_id)
     else:
         queue.enqueue('app.get_users_followers', args=(chat_id, text))
-        bot.send_message(chat_id, 'You will be notified when someone will (un)subscribe')
+        bot.send_message(chat_id, 'You will get notification when someone will (un)subscribe')
 
     return {'ok': True}
 
@@ -45,7 +47,6 @@ def add_task():
 def get_users_followers(chat_id, requested_username):
     while True:
         try:
-            print('Entered')
             user_profile = instaloader.Profile.from_username(profile_loader.context, requested_username)
             time.sleep(5)
 
@@ -69,7 +70,7 @@ def get_users_followers(chat_id, requested_username):
 
         except Exception as e:
             print(e)
-            bot.send_message(chat_id, f'Profile {requested_username} does not exist, do not be like eblan')
+            bot.send_message(chat_id, f'Profile with {requested_username} does not exist, do not be like eblan')
             break
         time.sleep(900)
 
