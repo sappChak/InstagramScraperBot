@@ -6,4 +6,5 @@ config
 python-telegram-bot
 requests
 rq
+gevent
 async-timeout
