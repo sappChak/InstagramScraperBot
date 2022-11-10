@@ -1,41 +1,30 @@
 import ast
-import multiprocessing
 import time
 from os import path
-import redis
 from flask import Flask, request
-from rq import Queue, Worker
 from telegram import Bot
 import instaloader
 import os
+import random
 
-#Telegram bot
+# Telegram bot
 bot = Bot(os.getenv('API_TOKEN'))
 
-#web app
+# web app
 application = Flask(__name__)
-
-#redis client
-redis_host = os.getenv('REDISHOST')
-redis_port = os.getenv('REDISPORT')
-redis_client = redis.Redis(host=redis_host, port=redis_port)
-
-queue = Queue(connection=redis_client, default_timeout=-1)
-
-
-def start_worker(queues, redis_db):
-    worker = Worker([queues], connection=redis_db)
-    worker.work()
 
 
 def welcome(chat_id):
     bot.send_message(chat_id,
-                     f'Hi! Please, type the username carefully. Enter username to start checking out:')
+                     f'Andrew on the bit. Ник свой напиши, не дай Бог неправильно - забаню нахуй :)')
 
 
 @application.route('/', methods=["POST"])
 def add_task():
- 
+    # from worker import redis_client
+    # redis_client.flushdb()
+    # redis_client.flushall()
+    # return {'ok': True}
     try:
         chat_id = request.json['message']['chat']['id']
         username = request.json['message']['from']['username']
@@ -49,27 +38,28 @@ def add_task():
     if text == '/start':
         welcome(chat_id)
     else:
-        queue.enqueue(f=get_users_followers, args=(chat_id, text))
-        multiprocessing.Process(target=start_worker, args=(queue, redis_client), daemon=True).start()
+        from worker import queue
+        # queue.enqueue(f=get_users_followers, args=(chat_id, text), job_timeout=-1)
+        # queue.create_job(func='app.get_users_followers', args=(chat_id, text))
+        queue.enqueue_call(func=get_users_followers, args=(chat_id, text), timeout=-1)
 
     return {'ok': True}
 
 
 def get_users_followers(chat_id, requested_username):
     profile_loader = instaloader.Instaloader()
-    profile_loader.load_session_from_file(username='check_unfollowers_andrew',
-                                          filename='session-check_unfollowers_andrew')
-    bot.send_message(chat_id, f'I have started staring at {requested_username} ;)')
+    profile_loader.load_session_from_file(username='instaunfollow2022', filename='session-instaunfollow2022')
+
+    bot.send_message(chat_id, f'Расслабься, самое сложно позади')
     while True:
         try:
-            bot.send_message(chat_id, 'I am inside the loop')
+            # bot.send_message(chat_id, 'I am inside the loop')
             user_profile = instaloader.Profile.from_username(profile_loader.context, requested_username)
-            time.sleep(5)
-            bot.send_message(chat_id, 'I am inside the loop 2')
+            # bot.send_message(chat_id, 'I am inside the loop 2')
             current_followers = []
             for follower in user_profile.get_followers():
                 current_followers.append(follower.username)
-
+            time.sleep(5)
             if not path.exists(f"follower_list-{requested_username}.txt"):
                 with open(file=f'follower_list-{requested_username}.txt', mode='w') as file:
                     file.write(str(current_followers))
@@ -84,13 +74,14 @@ def get_users_followers(chat_id, requested_username):
                 with open(file=f'follower_list-{requested_username}.txt', mode='w') as file:
                     file.write(str(current_followers))
 
-            bot.send_message(chat_id, f'I am here, but new files were not created. {os.listdir()}')
+            # bot.send_message(chat_id, f'I am here, but new files were not created. {os.listdir()}')
+            print(f'{os.listdir()}')
 
         except Exception as e:
             print(e)
-            bot.send_message(chat_id, f'Profile {requested_username} does not exist')
+            bot.send_message(chat_id, f'Напрягайся, такого ника: {requested_username} не существует. Я предупреждал.')
             break
-        time.sleep(900)
+        time.sleep(random.uniform(2500, 2800))
 
 
 def send_report(chat_id, followers, unfollowers):
@@ -105,10 +96,10 @@ def send_report(chat_id, followers, unfollowers):
         unfollowers = 'None'
 
     if unfollowers != 'None':
-        bot.send_message(chat_id, f"I've caught unfollower's username:{str(unfollowers)[1:-1]}")
+        bot.send_message(chat_id, f"Ник чмони :{str(unfollowers)[1:-1]}")
 
     if followers != 'None':
-        bot.send_message(chat_id, f':{str(followers)[1:-1]} has/have started subbing you')
+        bot.send_message(chat_id, f':{str(followers)[1:-1]} вкрашился в тебя')
 
 
 def check_unfollowers(old_followers, current_followers):
@@ -119,5 +110,5 @@ def check_followers(old_followers, current_followers):
     return list(set(current_followers) - set(old_followers))
 
 
-if __name__ == "__main__":
-     application.run(debug=False, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+# if __name__ == "__main__":
+#     application.run(debug=False, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
